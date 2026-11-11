@@ -1,0 +1,12 @@
+frame_id: map
+
+regions:
+  experiment_table_A:
+    x: 1.0
+    y: 2.0
+    yaw_deg: 90.0
+
+  storage_area:
+    x: 3.0
+    y: 1.5
+    yaw_deg: 180.0

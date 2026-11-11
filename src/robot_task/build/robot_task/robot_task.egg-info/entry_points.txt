@@ -1,0 +1,3 @@
+[console_scripts]
+task_bt = robot_task.task_bt:main
+

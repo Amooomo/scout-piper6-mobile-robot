@@ -1,0 +1,10 @@
+# Goal：上层任务希望导航到哪里？
+string region_id
+---
+# Result：导航结束后报告什么？
+bool success
+string message
+---
+# Feedback：执行过程中向上层报告什么？
+string phase
+float32 distance_remaining
