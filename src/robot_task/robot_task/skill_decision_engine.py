@@ -32,7 +32,7 @@ class SkillDecisionEngine:
         for candidate in candidates:
 
             allowed, reason = self.registry.check(
-                candidate.skill_id,
+                candidate,
                 goal,
                 state,
             )

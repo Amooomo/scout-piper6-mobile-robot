@@ -1,7 +1,12 @@
 from dataclasses import dataclass
 from typing import Callable
 
-from .skill_types import TaskGoal, RobotState, SkillID
+from .skill_types import (
+    TaskGoal,
+    RobotState,
+    SkillCandidate,
+    SkillID,
+)
 
 
 Precondition = Callable[
@@ -59,17 +64,74 @@ class SkillRegistry:
 
     def check(
         self,
-        skill_id: SkillID,
+        candidate: SkillCandidate,
         goal: TaskGoal,
         state: RobotState
     ) -> tuple[bool, str]:
 
-        spec = self._skills.get(skill_id)
+        spec = self._skills.get(candidate.skill_id)
 
         if spec is None:
             return False, "Unknown skill"
 
+        allowed, reason = self._check_arguments(
+            candidate.skill_id,
+            candidate.arguments,
+            goal,
+        )
+
+        if not allowed:
+            return False, reason
+
         return spec.precondition(goal, state)
+
+    @staticmethod
+    def _check_arguments(skill_id, arguments, goal):
+
+        if skill_id == SkillID.NAVIGATE_REGION:
+            return SkillRegistry._check_named_argument(
+                arguments,
+                "region_id",
+                goal.target_region_id,
+                "Target region is missing",
+                "region_id does not match target region",
+            )
+
+        if skill_id in (
+            SkillID.DETECT_OBJECT,
+            SkillID.MANIPULATE_PICK,
+        ):
+            return SkillRegistry._check_named_argument(
+                arguments,
+                "object_id",
+                goal.target_object_id,
+                "Target object is missing",
+                "object_id does not match target object",
+            )
+
+        return True, "No required arguments"
+
+    @staticmethod
+    def _check_named_argument(
+        arguments,
+        key,
+        expected_value,
+        missing_goal_reason,
+        mismatch_reason,
+    ):
+
+        value = arguments.get(key)
+
+        if not isinstance(value, str) or not value.strip():
+            return False, f"Missing or invalid {key}"
+
+        if not expected_value:
+            return False, missing_goal_reason
+
+        if value != expected_value:
+            return False, mismatch_reason
+
+        return True, f"{key} is valid"
 
     @staticmethod
     def _can_navigate(goal, state):

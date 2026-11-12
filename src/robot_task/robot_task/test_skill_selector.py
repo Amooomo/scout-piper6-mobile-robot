@@ -193,6 +193,40 @@ def main():
         f"{decision.selected.skill_id.value}"
     )
 
+    # 测试：DecisionEngine 将完整候选交给 Registry
+    # 高分但缺少必需参数的候选不能成为最终选中项
+    invalid_argument_candidates = [
+        SkillCandidate(
+            skill_id=SkillID.NAVIGATE_REGION,
+            score=0.99,
+            arguments={},
+        ),
+        SkillCandidate(
+            skill_id=SkillID.ASK_HUMAN,
+            score=0.01,
+            arguments={},
+        ),
+    ]
+
+    decision = engine.decide(
+        invalid_argument_candidates,
+        goal,
+        RobotState(current_region_id=None),
+    )
+
+    assert decision.selected is not None
+    assert decision.selected.skill_id == SkillID.ASK_HUMAN
+
+    assert (
+        SkillID.NAVIGATE_REGION.value
+        in decision.rejected_candidates
+    )
+
+    print(
+        "[PASS] Invalid arguments rejected in decision: "
+        f"{decision.selected.skill_id.value}"
+    )
+
     print("\n========== All Tests Passed ==========\n")
 
 
