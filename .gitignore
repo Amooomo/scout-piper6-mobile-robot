@@ -43,3 +43,4 @@ rosbags/
 !.env.example
 *.pem
 *.key
+Task_006*.md
